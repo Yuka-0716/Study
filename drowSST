@@ -1,0 +1,42 @@
+import xarray as xr
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+
+# NetCDFファイルを読み込む
+file_path = "C:/Users/bb40120052/Downloads/woa23_decav_t01_01.nc" # ダウンロードしたファイルのパス
+
+ds = xr.open_dataset(file_path, decode_times=False)  # decode_times=Falseを追加
+
+# データ確認
+print(ds)
+
+# 表層（0 m）の海水温データを抽出
+surface_temp = ds['t_an'].sel(depth=0, method="nearest")
+
+# 図を描画
+fig = plt.figure(figsize=(12, 6))
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.set_global()
+
+# 海水温をプロット
+temp_plot = surface_temp.plot(
+    ax=ax,
+    transform=ccrs.PlateCarree(),
+    cmap="coolwarm",
+    cbar_kwargs={"label": "Sea Surface Temperature (°C)"},
+)
+
+# 地図要素を追加
+ax.coastlines(resolution="110m", color="black", linewidth=1)
+ax.add_feature(cfeature.BORDERS, linestyle=':')
+ax.gridlines(draw_labels=True, dms=True, x_inline=False, y_inline=False)
+
+# タイトル
+plt.title("Global Sea Surface Temperature Distribution")
+
+# 図を保存（オプション）
+plt.savefig("global_sst.png", dpi=300, bbox_inches="tight")
+
+# 図を表示
+plt.show()
