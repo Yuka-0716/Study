@@ -1,0 +1,44 @@
+import netCDF4 as nc
+import numpy as np
+
+# NetCDFファイルのパス
+file_path =  "E:/Master/MSM(rawdata)/0301.nc"
+
+# NetCDFファイルを開く
+ds = nc.Dataset(file_path)
+
+# 必要な変数を読み込む
+latitude = ds.variables['lat'][:]
+longitude = ds.variables['lon'][:]
+
+# 指定した地点の緯度・経度
+points = {
+    #"地点1": (32 + 44.2 / 60, 130 + 15.7 / 60),
+    "地点1(ひまわりデータ抽出点)": (32.75, 130.30),
+    "地点2(妙見岳駅)": (32.75625, 130.28568),
+    "地点3(仁田峠駅)": (32.75088, 130.28554)
+}
+
+# 各地点に対応するグリッドのインデックスを取得
+grid_indices = {}
+for name, (lat, lon) in points.items():
+    lat_index = np.abs(latitude - lat).argmin()
+    lon_index = np.abs(longitude - lon).argmin()
+    grid_indices[name] = (lat_index, lon_index)
+
+# グリッドインデックスを比較して全地点が同じグリッドにあるか確認
+unique_grids = set(grid_indices.values())
+
+if len(unique_grids) == 1:
+    print("すべての地点は同じグリッドに属しています。")
+    print("各地点のグリッドインデックス:")
+    for name, indices in grid_indices.items():
+        print(f"{name}: {indices}")
+else:
+    print("すべての地点は同じグリッドに属していません。")
+    print("各地点のグリッドインデックス:")
+    for name, indices in grid_indices.items():
+        print(f"{name}: {indices}")
+
+# NetCDFファイルを閉じる
+ds.close()
