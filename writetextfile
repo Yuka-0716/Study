@@ -1,0 +1,40 @@
+import netCDF4 as nc
+import numpy as np
+
+# NetCDFファイルのパス
+file_path = 'C:/Users/bb40120052/Desktop/Python/.vscode/Master/NC_H08_20220301_0000_L2CLP010_FLDK.02401_02401.nc'
+output_file = 'testwrite1.txt'
+
+# NetCDFファイルを開く
+ds = nc.Dataset(file_path)
+
+# 必要な変数を読み込む
+latitude = ds.variables['latitude'][:]
+longitude = ds.variables['longitude'][:]
+
+# 指定した緯度・経度
+target_lat, target_lon = 32.75, 130.30
+
+# 対応するインデックスを取得
+lat_index = np.abs(latitude - target_lat).argmin()
+lon_index = np.abs(longitude - target_lon).argmin()
+
+# 変数のデータを取得
+variables_to_extract = ['Hour', 'CLOT', 'CLTT', 'CLTH', 'CLER_23', 'CLTYPE', 'QA']
+data = {}
+
+for var_name in variables_to_extract:
+    var_data = ds.variables[var_name][:]
+    data[var_name] = var_data[lat_index, lon_index]
+
+# 結果をテキストファイルに書き込む
+with open(output_file, 'w') as f:
+    f.write(f"Data at Latitude: {latitude[lat_index]:.2f}, Longitude: {longitude[lon_index]:.2f}\n")
+    f.write("=" * 50 + "\n")
+    for var_name, value in data.items():
+        f.write(f"{var_name}: {value}\n")
+
+print(f"Data extracted and written to {output_file}")
+
+# NetCDFファイルを閉じる
+ds.close()
