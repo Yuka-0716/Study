@@ -1,0 +1,77 @@
+import netCDF4 as nc
+import numpy as np
+import os
+
+# 対象フォルダと出力ファイルのパス
+input_folder = "E:/Master/MSM(rawdata)"
+output_file = "E:/Master/MSM/extracted_data.txt"
+
+# 緯度・経度のターゲット値
+target_lat, target_lon = 32.75, 130.30
+
+# NetCDFファイルの名前から日時を取得する関数
+def extract_datetime_from_filename(filepath):
+    filename = os.path.basename(filepath)
+    parts = filename.split('_')
+    if len(parts) >= 3:
+        datetime_str = parts[1] + "_" + parts[2][:4]  # "20220303_1850" の部分を取得
+        return datetime_str
+    return filename  # フォーマットに一致しない場合はファイル名をそのまま返す
+
+# フォルダ内のNetCDFファイルを再帰的に取得し、時系列順に並び替える
+file_list = []
+for root, dirs, files in os.walk(input_folder):
+    for file in files:
+        if file.endswith(".nc"):
+            file_list.append(os.path.join(root, file))
+
+# ファイルを時系列順にソート
+file_list.sort(key=extract_datetime_from_filename)
+
+# データを出力ファイルに書き込む
+with open(output_file, 'w') as f:
+    header_written = False  # ヘッダーを書き込んだかどうか
+    for file_path in file_list:
+        with nc.Dataset(file_path, 'r') as ds:
+            # 緯度・経度を取得
+            latitude = ds.variables['lat'][:]
+            longitude = ds.variables['lon'][:]
+
+            # 対応するインデックスを取得
+            lat_index = np.abs(latitude - target_lat).argmin()
+            lon_index = np.abs(longitude - target_lon).argmin()
+
+            # 必要な変数
+            variables_to_extract = [
+                'time', 'psea', 'sp', 'u', 'v', 'temp', 'rh', 
+                'r1h', 'ncld_upper', 'ncld_mid', 'ncld_low', 'ncld', 'dswrf'
+            ]
+
+            # ヘッダーを書き込む
+            if not header_written:
+                f.write("File " + " ".join(variables_to_extract) + "\n")
+                header_written = True
+
+            # データ行を生成
+            data_line = [os.path.basename(file_path)]
+            for var_name in variables_to_extract:
+                var_data = ds.variables[var_name]
+                
+                # 次元を確認して値を取得
+                if var_data.ndim == 1:  # 1次元配列の場合
+                    raw_value = var_data[0]  # 最初の値を取得
+                elif var_data.ndim == 3:  # 3次元配列の場合
+                    raw_value = var_data[0, lat_index, lon_index]  # 時間次元の最初、指定した緯度・経度
+                else:
+                    raw_value = "N/A"  # 対応外の場合
+
+                # 欠損値チェック
+                if np.ma.is_masked(raw_value) or raw_value == getattr(ds.variables[var_name], '_FillValue', None):
+                    data_line.append("N/A")
+                else:
+                    data_line.append(str(raw_value))
+
+            # ファイルごとのデータを出力ファイルに追記
+            f.write(" ".join(data_line) + "\n")
+
+print(f"Data extracted and written to {output_file}")
