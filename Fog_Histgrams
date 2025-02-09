@@ -1,0 +1,48 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# ファイルパス
+input_file = "E:/Master/FogData/202203-202302.txt"
+
+# データの読み込み
+data = pd.read_csv(input_file, sep="\t", header=None, 
+                   names=["days", "Hour", "CLOT", "CLTT", "CLTH", "CLER_23", "CTYPE", "QA"], na_values="N/A")
+
+# 時間の統合
+data["Timestamp"] = pd.to_datetime(data["days"].astype(str) + data["Hour"].astype(str).str.zfill(4), format="%Y%m%d%H%M")
+
+# 描画する列とbin設定
+target_columns_bins = {
+    "CLOT": (0, 21, 1.0),       # 0から20の1.0ずつのbin
+    "CLTT": (230, 300, 10.0),    # 230から300まで5ずつのbin
+    "CLTH": (0, 5.0, 0.5),      # 0から5まで0.1ずつのbin
+    "CLER_23": (0, 30, 5.0),    # 0から30まで5ずつのbin
+    "CTYPE": (0, 10, 1.0)       # 0から9まで1ずつのbin
+}
+
+# 各変数ごとにヒストグラム作成
+for column, (start, end, step) in target_columns_bins.items():
+    plt.figure(figsize=(10, 6))
+
+    # 横軸(bins)の生成
+    bins = np.arange(start, end + step, step)
+
+    # ヒストグラムの描画
+    n, bins, patches = plt.hist(data[column].dropna(), bins=bins, alpha=0.7, label=column, edgecolor='black')
+
+    # グラフの設定
+    plt.title(f"Histogram of {column}")
+    plt.xlabel(column)
+    plt.ylabel("Sample Count")
+    plt.grid(True)
+    plt.tight_layout()
+
+    # 総データ数とヒストグラムの値を出力
+    print(f"\n=== {column} ===")
+    print(f"Total data points: {data[column].notna().sum()}")
+    print(f"Histogram values: {n}")
+    print(f"Bin edges: {bins}")
+
+    # プロットの表示
+    plt.show()
