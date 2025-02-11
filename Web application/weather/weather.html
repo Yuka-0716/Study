@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <!-- style.cssを適用 -->
+         <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/style.css">
+         <!-- keyframes.cssを適用 -->
+         <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/keyframes.css">
+         <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/slide.css">
+         <link rel="shortcut icon" type="image/png" href="webページテンプレート/images/terukologo.jpg">
+         <link rel="stylesheet" href="webページテンプレート/CSS/headerstyle.css">
+         <style>
+            body {
+                /* 背景画像の設定 */
+                background-image: url('webページテンプレート/images_photo/1.jpg');
+                /* 画像を中央に配置し、背景サイズをカバー */
+                background-position: center;
+                background-size: cover;
+                /* 背景のスクロールを固定 */
+                background-attachment: fixed;
+            }
+        
+        </style>
+        <header>
+            <img src='webページテンプレート/images/terukologo.jpg' alt=”teruko” width="50" height="50">
+             <h1 class ="title">Teruko</h1>
+            <nav class="nav">
+                <ul class="menu-group">
+                  <li class="menu-item"><a href="input.html">HOME</a></li>
+                  <li class="menu-item"><a href="showall.php">結果一覧</a></li>
+                  <li class="menu-item"><a href="introduce.html">アプリの紹介</a></li>
+                  <li class="menu-item"><a href="login.php">管理者ログイン</a></li>
+                </ul>
+              </nav>
+              
+    
+        </header>
+        <img src='webページテンプレート/images/headder6.png' alt=”teruko” width="1300" height="200">
+     </head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天気予報</title>
+    <link rel="stylesheet" href="./weather.css">
+</head>
+<body>
+
+    <style>
+        div{
+            text-align:center;
+        }
+        table{
+            margin-left:auto;
+            margin-right:auto;
+        }
+    </style>
+    <div>
+    <div id="location"><a href="https://www.jma.go.jp/bosai/forecast/" target="_blank">気象庁のデータを元に作成</a></div>
+    <div class="box7">
+    <div class="weatherForecast">
+        <div class="weather">
+            <div class="date">--/--(-)</div>
+            <img class="weatherImg">
+            <div class="weatherTelop">--</div>
+            <div><span class="tempMin">-℃</span>/<span class="tempMax">-℃</span></div>
+        </div>
+        </div>
+    </div><br><br>
+    
+    
+    <script src="./weather.js"></script>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <iframe src="./random.html" width="1000" height="400"></iframe>
+<!-- "入力画面に戻る"ボタン -->
+<center><button onclick="returnToInput()">HOMEに戻る</button></center>
+
+<script>
+    for (let i = 0; i < 6; i++) {
+        const el = document.querySelector('.weather').cloneNode(true);
+        document.querySelector('.weatherForecast').appendChild(el);
+    }
+
+    // 入力画面に戻る関数
+    function returnToInput() {
+        window.location.href = 'input.html';
+    }
+</script>
+
+</body>
+</html>
