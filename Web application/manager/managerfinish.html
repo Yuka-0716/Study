@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/style.css">
+    <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/keyframes.css">
+    <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/slide.css">
+    <link rel="shortcut icon" type="image/png" href="webページテンプレート/images/terukologo.jpg">
+    <link rel="stylesheet" href="webページテンプレート/CSS/headerstyle.css">
+    <style>
+        body {
+            /* 背景画像の設定 */
+            background-image: url('webページテンプレート/images_photo/1.jpg');
+            /* 画像を中央に配置し、背景サイズをカバー */
+            background-position: center;
+            background-size: cover;
+            /* 背景のスクロールを固定 */
+            background-attachment: fixed;
+        }
+        .memo {
+            border: 1px solid #000;
+            padding: 10px;
+            margin: 10px;
+            
+        }
+        .memo img {
+            max-width: 100px;
+            max-height: 100px;
+        }
+        .memo h2 {
+            font-size: 1.2em; /* タイトルのフォントサイズを1.2倍にする */
+            color: rgb(111, 20, 70); /* タイトルの色を赤色にする */
+        }
+    </style>
+    <header>
+        <img src='webページテンプレート/images/terukologo.jpg' alt="teruko" width="50" height="50">
+        <h1 class="title">Teruko</h1>
+        <nav class="nav">
+            <ul class="menu-group">
+                <li class="menu-item"><a href="input.html">HOME</a></li>
+                <li class="menu-item"><a href="showall.php">結果一覧</a></li>
+                <li class="menu-item"><a href="introduce.html">アプリの紹介</a></li>
+                <li class="menu-item"><a href="login.php">管理者ログイン</a></li>
+            </ul>
+        </nav>
+    </header>
+    <title>管理者画面</title>
+</head>
+<body>
+    <h1>管理者画面です。</h1>
+    <p>お天気めもの編集ができます。</p>
+    <div id="memos"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="./script.js"></script>
+    <script>
+        
+
+        $(document).ready(function() {
+            memos.forEach((memo, index) => {
+                $('#memos').append(`
+                    <div class="memo">
+                        <h2>${memo.title}</h2>
+                        <p>${memo.content}</p>
+                        <img src="${memo.img}" alt="${memo.title}">
+                        <br>
+                        <a href="confirm.html?memo=${encodeURIComponent(JSON.stringify(memo))}">内容を編集する</a>
+                    </div>
+                `);
+            });
+
+            const confirmedMemo = JSON.parse(localStorage.getItem('confirmedMemo'));
+            if (confirmedMemo) {
+                const index = memos.findIndex(m => m.title === confirmedMemo.title);
+                if (index !== -1) {
+                    memos[index] = confirmedMemo;
+                }
+                localStorage.removeItem('confirmedMemo');
+                $('#memos').html('');
+                memos.forEach((memo, index) => {
+                    $('#memos').append(`
+                        <div class="memo">
+                            <h2>${memo.title}</h2>
+                            <p>${memo.content}</p>
+                            <img src="${memo.img}" alt="${memo.title}">
+                            <br>
+                            <a href="confirm.html?memo=${encodeURIComponent(JSON.stringify(memo))}">内容を編集する</a>
+                        </div>
+                    `);
+                });
+            }
+        });
+         
+    </script>
+</body>
+</html>
