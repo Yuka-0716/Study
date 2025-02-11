@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/style.css">
+    <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/keyframes.css">
+    <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/slide.css">
+    <link rel="shortcut icon" type="image/png" href="webページテンプレート/images/terukologo.jpg">
+    <link rel="stylesheet" href="webページテンプレート/CSS/headerstyle.css">
+    <style>
+        body {
+            /* 背景画像の設定 */
+            background-image: url('webページテンプレート/images_photo/1.jpg');
+            /* 画像を中央に配置し、背景サイズをカバー */
+            background-position: center;
+            background-size: cover;
+            /* 背景のスクロールを固定 */
+            background-attachment: fixed;
+        }
+        .p {
+            border: 1px solid #000;
+            padding: 10px;
+            margin: 10px;
+            background-color: rgba(231, 178, 231, 0.603);
+        }
+        .memo {
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center; 
+            max-width: 1000px;
+            max-height: 200px;
+        }
+        .memo-container h2 {
+            font-size: 1.2em;
+            color: rgb(111, 20, 70);
+            text-align: center;
+            margin: 0 auto;
+        }
+        .memo img {
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center; 
+            width: 180px;
+            height: 160px;
+        }
+    </style>
+<body>
+ 
+    <div id="memo-container">
+        <!-- コンテンツがここに表示されます -->
+    </div>
+    <div class ="memo">
+    <script>
+        const contentList = [
+            "コンテンツ1",
+            "コンテンツ2",
+            "コンテンツ3",
+            "コンテンツ4",
+            "コンテンツ5",
+            // 追加のコンテンツをここに追加
+        ];
+    </script>
+
+        <script src="./script.js"></script>
+    <script>
+
+        // ランダムなコンテンツを選択
+        const randomContentIndex = Math.floor(Math.random() * contentList.length);
+        const randomContent = contentList[randomContentIndex];
+
+        // ランダムなコンテンツを表示
+        const memoContainer = document.getElementById('memo-container');
+        const selectedMemo = memos[randomContentIndex];
+        const memoHTML = `
+                <h2>${selectedMemo.title}</h2>
+                <p>${selectedMemo.content}</p>
+                <div class="memo img">
+                    <img src="${selectedMemo.img}" alt="${selectedMemo.title}">
+                </div>
+        `;
+        memoContainer.innerHTML = memoHTML;
+    </script>
+</body>
+</html>
