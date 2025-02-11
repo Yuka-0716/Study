@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/style.css">
+    <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/keyframes.css">
+    <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/slide.css">
+    <link rel="shortcut icon" type="image/png" href="webページテンプレート/images/terukologo.jpg">
+    <link rel="stylesheet" href="webページテンプレート/CSS/headerstyle.css">
+    <style>
+        body {
+            /* 背景画像の設定 */
+            background-image: url('webページテンプレート/images_photo/1.jpg');
+            /* 画像を中央に配置し、背景サイズをカバー */
+            background-position: center;
+            background-size: cover;
+            /* 背景のスクロールを固定 */
+            background-attachment: fixed;
+             /* 中央ぞろえ */
+             display: flex;
+             justify-content: center;
+             align-items: center;
+             height: 100vh;
+             margin: 0;
+        }
+
+        #memo-content {
+            text-align: center; /* 本文の内容を中央ぞろえにする */
+            background: rgba(255, 255, 255, 0.8); /* 背景色を白にし、透明度を追加 */
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%; /* コンテンツの幅を大きくする */
+            max-width: 800px; /* 最大幅を設定 */
+        }
+        #memo-title, #memo-img {
+            width: 80%; /* タイトルと画像URLの入力部分を大きくする */
+            padding: 10px; /* 入力部分にパディングを追加 */
+            font-size: 1.0em; /* フォントサイズを大きくする */
+            margin-bottom: 10px; /* 入力欄の下に余白を追加 */
+        }
+        #memo-content-text {
+            width: 100%; /* contantsの入力部分を大きく広げる */
+            height: 200px; /* 高さも広げる */
+            padding: 10px; /* 入力部分にパディングを追加 */
+            font-size: 1.0em; /* フォントサイズを大きくする */
+            margin-bottom: 10px; /* 入力欄の下に余白を追加 */
+        }
+        button {
+            margin: 10px;
+            padding: 5px 10px; /* ボタンを小さくする */
+            font-size: 0.8em; /* ボタンのフォントサイズを小さくする */
+        }
+        h2 {
+            text-align: center; /* 見出しを中央ぞろえにする */
+        }
+        div {
+            text-align: center;
+        }
+        table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+    <title>HOME</title>
+</head>
+<body>
+    <h2><span>編集画面</span></h2>
+    <div id="memo-content">
+        <form id="memo-form">
+            <label for="memo-title">タイトル:</label>
+            <input type="text" id="memo-title" name="title"><br>
+            <label for="memo-content">内容:</label>
+            <textarea id="memo-content-text" name="content"></textarea><br>
+            <label for="memo-img">画像のURL:</label>
+            <input type="text" id="memo-img" name="img"><br>
+            <input type="hidden" id="original-memo" name="original-memo">
+            <button type="button" onclick="saveChanges()">変更を保存する</button>
+            <button type="button" onclick="goBack()">管理者画面に戻る</button>
+        </form>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const memo = JSON.parse(decodeURIComponent(urlParams.get('memo')));
+            
+            $('#memo-title').val(memo.title);
+            $('#memo-content-text').val(memo.content);
+            $('#memo-img').val(memo.img);
+            $('#original-memo').val(urlParams.get('memo'));
+        });
+
+        function saveChanges() {
+            const editedMemo = {
+                title: $('#memo-title').val(),
+                content: $('#memo-content-text').val(),
+                img: $('#memo-img').val()
+            };
+
+            localStorage.setItem('editedMemo', JSON.stringify(editedMemo));
+            window.location.href = 'save.html'; /* save.htmlへ遷移するように修正 */
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>
