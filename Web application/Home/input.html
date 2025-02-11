@@ -3,33 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>地域選択</title>
-</head>
-<body>
-    <h1>地域選択</h1>
-    <form action="weather.html" method="GET">
+     <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/style.css">
+     <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/keyframes.css">
+     <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/slide.css">
+     <link rel="shortcut icon" type="image/png" href="webページテンプレート/images/terukologo.jpg">
+     <link rel="stylesheet" href="webページテンプレート/CSS/headerstyle.css">
+     <style>
+        body {
+            /* 背景画像の設定 */
+            background-image: url('webページテンプレート/images_photo/1.jpg');
+            /* 画像を中央に配置し、背景サイズをカバー */
+            background-position: center;
+            background-size: cover;
+            /* 背景のスクロールを固定 */
+            background-attachment: fixed;
+        }
+        
+    </style>
+    <header>
+        <img src='webページテンプレート/images/terukologo.jpg' alt=”teruko” width="50" height="50">
+         <h1 class ="title">Teruko</h1>
+        <nav class="nav">
+            <ul class="menu-group">
+                <li class="menu-item"><a href="input.html">HOME</a></li>
+              <li class="menu-item"><a href="showall.php">結果一覧</a></li>
+              <li class="menu-item"><a href="introduce.html">アプリの紹介</a></li>
+              <li class="menu-item"><a href="login.php">管理者ログイン</a></li>
+            </ul>
+          </nav>
+          
+
+    </header>
+    <title>HOME</title>
+    </head>
+    <img src='webページテンプレート/images/headder6.png' alt=”teruko” width="1500" height="200">
+    <!--img src='webページテンプレート/images/header2.png' alt=”teruko” width="1300" height="200"-->
+    <style>
+        div{
+            text-align:center;
+        }
+        table{
+            margin-left:auto;
+            margin-right:auto;
+        }
+        .map {
+            margin-left:auto;
+            margin-right:auto;
+            text-align: center; 
+            width: 560px; /* 固定幅 */
+            height: 315px; /* 固定高さ */
+        }
+    </style>
+    <div>
+    <h1>天気予報を知りたい地域を選択してください</h1>
+    <form id="mainForm" action="insert_area.php" method="POST">
         <label for="region">地方:</label>
-        <select id="region" onchange="updatePrefectures()">
+        <select id="region" name="region" onchange="updatePrefectures()">
             <option value="">選択してください</option>
         </select>
         <br>
         <label for="prefecture">都道府県:</label>
-        <select id="prefecture" name="areaCode">
+        <select id="prefecture" name="prefecture">
             <option value="">選択してください</option>
         </select>
         <br>
-        <button type="submit" id="submitBtn">入力</button>
-    </form><br>
-
-    <button onclick="showall()">一覧表示</button><br><br>
-    
-
-    <!-- 管理者としてログインボタン -->
-    <button onclick="adminLogin()">管理者としてログイン</button>
-
-    
+        <input type="hidden" id="areaCode" name="areaCode">
+        <button type="submit">入力</button>
+ 
+    </div> 
+    </form>
 
     <script>
+        
+        // 地域と都道府県のデータ
         const regions = {
             "北海道地方": ["宗谷地方", "上川・留萌地方", "網走・北見・紋別地方", "十勝地方", "釧路・根室地方", "胆振・日高地方", "石狩・空知・後志地方", "渡島・檜山地方"],
             "東北地方": ["青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県"],
@@ -105,6 +151,7 @@
             "八重山地方": "474000"
         };
 
+        // ページ読み込み時に地方の選択肢を設定
         window.onload = () => {
             const regionSelect = document.getElementById("region");
             for (let region in regions) {
@@ -115,9 +162,11 @@
             }
         };
 
+        // 地方選択変更時に都道府県の選択肢を更新
         function updatePrefectures() {
             const regionSelect = document.getElementById("region");
             const prefectureSelect = document.getElementById("prefecture");
+            const areaCodeInput = document.getElementById("areaCode");
             const selectedRegion = regionSelect.value;
 
             while (prefectureSelect.options.length > 1) {
@@ -127,23 +176,34 @@
             if (selectedRegion && regions[selectedRegion]) {
                 regions[selectedRegion].forEach(prefecture => {
                     const option = document.createElement("option");
-                    option.value = areaCodes[prefecture];
+                    option.value = prefecture;
                     option.text = prefecture;
                     prefectureSelect.add(option);
                 });
             }
+
+            prefectureSelect.onchange = () => {
+                const selectedPrefecture = prefectureSelect.value;
+                if (selectedPrefecture && areaCodes[selectedPrefecture]) {
+                    areaCodeInput.value = areaCodes[selectedPrefecture];
+                } else {
+                    areaCodeInput.value = '';
+                }
+            };
         }
 
-
-         // 一覧表示関数
-         function showall() {
+        function showall() {
             window.location.href = 'showall.php';
         }
 
-        // 管理者ログイン関数
         function adminLogin() {
             window.location.href = 'login.php';
         }
+
+        
     </script>
+    <div class="map">
+    <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d13415.763356933086!2d129.8661376!3d32.7938279!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sja!2sjp!4v1717723316292!5m2!1sja!2sjp" width="400" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
 </body>
 </html>
