@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/style.css">
+     <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/keyframes.css">
+     <link rel="stylesheet" type="text/css" href="webページテンプレート/CSS/slide.css">
+     <link rel="shortcut icon" type="image/png" href="webページテンプレート/images/terukologo.jpg">
+     <link rel="stylesheet" href="webページテンプレート/CSS/headerstyle.css">
+     <style>
+        body {
+            /* 背景画像の設定 */
+            background-image: url('webページテンプレート/images_photo/1.jpg');
+            /* 画像を中央に配置し、背景サイズをカバー */
+            background-position: center;
+            background-size: cover;
+            /* 背景のスクロールを固定 */
+            background-attachment: fixed;
+        }
+        h1{
+            clear: both;
+	        margin-bottom: 50px;	/*下に空けるスペース*/
+	        font-size: 2.25rem;		/*文字サイズ。冒頭で指定しているフォントサイズの2.25倍です。*/
+	        text-align: center;		/*文字をセンタリング*/
+	        letter-spacing: 0.1em;
+            color: rgb(111, 20, 70); /* タイトルの色を赤色にする */
+        }
+        h3{
+            clear: both;
+	        margin-bottom: 50px;	/*下に空けるスペース*/
+	        font-size: 1.5rem;		/*文字サイズ。冒頭で指定しているフォントサイズの2.25倍です。*/
+	        text-align: center;		/*文字をセンタリング*/
+	        letter-spacing: 0.1em;
+            color: rgb(82, 20, 111); /* タイトルの色を赤色にする */
+        }
+
+        content{
+            padding: 150px 100px;	/*上下、左右へのコンテンツ内の余白*/
+            position: relative;
+            text-align: center;	
+            animation-name: opa1;		/*keyframes.cssで使う@keyframesの指定*/
+            animation-duration: 0.5S;	/*アニメーションの実行時間*/
+            animation-delay: 0.5s;		/*出現するタイミング（秒後）*/
+            animation-fill-mode: both;
+        }
+        #contents p {
+            padding: 0 3% 30px;	/*上、左右、下への余白*/
+            text-align: center;	
+        }
+    </style>
+    <header>
+        <img src='webページテンプレート/images/terukologo.jpg' alt="teruko" width="50" height="50">
+         <h2 class ="title">Teruko</h2>
+        <nav class="nav">
+            <ul class="menu-group">
+                <li class="menu-item"><a href="input.html">HOME</a></li>
+              <li class="menu-item"><a href="showall.php">結果一覧</a></li>
+              <li class="menu-item"><a href="introduce.html">アプリの紹介</a></li>
+              <li class="menu-item"><a href="login.php">管理者ログイン</a></li>
+            </ul>
+          </nav>
+    </header>
+    <title>アプリの紹介</title>
+    </head>
+    <body>
+    <img src='webページテンプレート/images/headder6.png' alt="teruko" width="1500" height="200">
+    <style>
+        div{
+            text-align:center;
+        }
+        table{
+            margin-left:auto;
+            margin-right:auto;
+        }
+        .video {
+            margin-left:auto;
+            margin-right:auto;
+            text-align: center; 
+            width: 560px; /* 固定幅 */
+            height: 315px; /* 固定高さ */
+        }
+
+    </style>
+    <div class="content">
+    <h1>Terukoについて</h1><br>
+    <p>Terukoは、任意の地点の天気予報を取得するアプリケーションです。</p>
+    <p>「人生いろいろありますが、晴れの日も雨の日も、あなたの心は晴れていますように。」</p>
+    <p>という願いを込めて、てるてる坊主から名づけました。</p>
+    <p>検索結果一覧や、あなたの暮らしを少し豊かにする「お天気めも」を見ることができます。</p>
+    <p>雨が降るかどうかだけでなく、たまには空を見上げ、雲をのんびりと眺めてみてください。</p><br><br>
+
+    <h1>開発者の紹介  <img src='webページテンプレート/images/myself1.jpg' alt="myself" width="80" height="80"></h1>
+    <p>長崎大学大学院　　　総合生産科学研究科</p>
+    <p>共生システム科学コース　　環境レジリエンス分野(環境系)</p>
+    <p>潮見　友香</p><br>
+    <p>環境科学部出身です。研究室では、fortranを使って気象衛星データを解析することで、</p>
+    <p>雲を構成する小さな粒ひとつひとつがどのように発生し、どのように雨となるのかを調査しています。</p>
+    <p>みなさんの生活に役立ち、空の美しさを少しでも知っていただけるようなアプリケーションを開発しました。</p>
+    <p>生まれて初めてのアプリケーション開発です。</p>
+    <p>お手柔らかにお願いします。</p><br><br>
+
+    <h1>空について知りたいあなたへ</h1>
+    <h3>ブルーモーメント</h3>
+    <p>山下智久さん主演、毎週水曜日夜10時から放送しているドラマです。</p>
+    <p>数々の異常気象に気象学の天才が立ち向かい、人々の命を守ります。</p>
+    <p>いざという時、自分の身を守れるのは自分だけ。<p>
+    <p>ニュースでよく聞く気象用語や災害時の身の守り方を、楽しみながら学ぶことができます。</p><br>
+    <div class =video>
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/AFil04i00II?si=-R4sI4FGkqhWvEse" 
+    title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; 
+    gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <br><br>
+    <button onclick="returnToInput()">HOMEに戻る</button>
+
+<script>
+    // 入力画面に戻る関数
+    function returnToInput() {
+        window.location.href = 'input.html';
+    }
+</script><br><br>
+
+    </body>
+    </html>
