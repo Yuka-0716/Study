@@ -119,56 +119,60 @@ const weatherCode = {
     450: ["400.svg", "400.svg", "雪で雷を伴う"],
   };
   
-  // ここのXXXXXX.jsonを変更する
-  const url = "https://www.jma.go.jp/bosai/forecast/data/forecast/130000.json";
-  
-  const dayList = ["日", "月", "火", "水", "木", "金", "土"];
-  
-  const timeDefinesList = new Array();
-  const weatherCodeList = new Array();
-  const tempsMinList = new Array();
-  const tempsMaxList = new Array();
-  
-  fetch(url)
-    .then(function (response) {
-      return response.json();
-    })
-    .then(function (weather) {
-      document
-        .getElementById("location")
-        .prepend(
-          `${weather[1].publishingOffice}: ${weather[1].timeSeries[0].areas[0].area.name} `
-        );
-      const isTodaysData = weather[0].timeSeries[2].timeDefines.length === 4;
-      const weatherCodes = weather[0].timeSeries[0].areas[0].weatherCodes;
-      const timeDefines = weather[0].timeSeries[0].timeDefines;
-      const temps = weather[0].timeSeries[2].areas[0].temps;
-      weatherCodeList.push(weatherCodes[0], weatherCodes[1]);
-      timeDefinesList.push(timeDefines[0], timeDefines[1]);
-      if (isTodaysData) {
-        tempsMinList.push(temps[0] === temps[1] ? "--" : temps[0], temps[2]);
-        tempsMaxList.push(temps[1], temps[3]);
-      } else {
-        tempsMinList.push("--", temps[0]);
-        tempsMaxList.push("--", temps[1]);
-      }
-  
-      const startCount =
-        weather[1].timeSeries[0].timeDefines.indexOf(timeDefines[1]) + 1;
-      for (let i = startCount; i < startCount + 5; i++) {
-        weatherCodeList.push(weather[1].timeSeries[0].areas[0].weatherCodes[i]);
-        timeDefinesList.push(weather[1].timeSeries[0].timeDefines[i]);
-        tempsMinList.push(weather[1].timeSeries[1].areas[0].tempsMin[i]);
-        tempsMaxList.push(weather[1].timeSeries[1].areas[0].tempsMax[i]);
-      }
-  
-      const date = document.getElementsByClassName("date");
-      const weatherImg = document.getElementsByClassName("weatherImg");
-      const weatherTelop = document.getElementsByClassName("weatherTelop");
-      const tempMin = document.getElementsByClassName("tempMin");
-      const tempMax = document.getElementsByClassName("tempMax");
-  
-      weatherCodeList.forEach(function (el, i) {
+// エリアコードを取得
+const urlParams = new URLSearchParams(window.location.search);
+const areaCode = urlParams.get('areaCode');
+
+// エリアコードを含むURLを作成
+const url = `https://www.jma.go.jp/bosai/forecast/data/forecast/${areaCode}.json`;
+
+const dayList = ["日", "月", "火", "水", "木", "金", "土"];
+
+const timeDefinesList = [];
+const weatherCodeList = [];
+const tempsMinList = [];
+const tempsMaxList = [];
+
+fetch(url)
+  .then(function (response) {
+    return response.json();
+  })
+  .then(function (weather) {
+    document
+      .getElementById("location")
+      .prepend(
+        `${weather[1].publishingOffice}: ${weather[1].timeSeries[0].areas[0].area.name} `
+      );
+    const isTodaysData = weather[0].timeSeries[2].timeDefines.length === 4;
+    const weatherCodes = weather[0].timeSeries[0].areas[0].weatherCodes;
+    const timeDefines = weather[0].timeSeries[0].timeDefines;
+    const temps = weather[0].timeSeries[2].areas[0].temps;
+    weatherCodeList.push(weatherCodes[0], weatherCodes[1]);
+    timeDefinesList.push(timeDefines[0], timeDefines[1]);
+    if (isTodaysData) {
+      tempsMinList.push(temps[0] === temps[1] ? "--" : temps[0], temps[2]);
+      tempsMaxList.push(temps[1], temps[3]);
+    } else {
+      tempsMinList.push("--", temps[0]);
+      tempsMaxList.push("--", temps[1]);
+    }
+
+    const startCount =
+      weather[1].timeSeries[0].timeDefines.indexOf(timeDefines[1]) + 1;
+    for (let i = startCount; i < startCount + 5; i++) {
+      weatherCodeList.push(weather[1].timeSeries[0].areas[0].weatherCodes[i]);
+      timeDefinesList.push(weather[1].timeSeries[0].timeDefines[i]);
+      tempsMinList.push(weather[1].timeSeries[1].areas[0].tempsMin[i]);
+      tempsMaxList.push(weather[1].timeSeries[1].areas[0].tempsMax[i]);
+    }
+
+    const date = document.getElementsByClassName("date");
+    const weatherImg = document.getElementsByClassName("weatherImg");
+    const weatherTelop = document.getElementsByClassName("weatherTelop");
+    const tempMin = document.getElementsByClassName("tempMin");
+    const tempMax = document.getElementsByClassName("tempMax");
+
+    weatherCodeList.forEach(function (el, i) {
         let dt = new Date(timeDefinesList[i]);
         let weekdayCount = dt.getDay();
         if (weekdayCount === 0) date[i].style.color = "red";
@@ -183,5 +187,3 @@ const weatherCode = {
         tempMax[i].textContent = tempsMaxList[i] + "℃";
       });
     });
-  
-  
