@@ -1,0 +1,66 @@
+import os
+import pandas as pd
+import numpy as np
+from scipy.stats import norm
+
+def Mann_Kendall(x, alpha=0.1):
+    
+    x = x[~np.isnan(x)].reshape(-1)
+    n = len(x)
+
+    # Sを計算
+    s = 0
+    for k in range(n - 1):
+        for j in range(k + 1, n):
+            s += np.sign(x[j] - x[k])
+
+    # 重複のない値を計算
+    unique_x = np.unique(x)
+
+    # 分散を計算
+    tp = np.zeros(unique_x.shape)
+
+    for i in range(len(unique_x)):
+        tp[i] = np.sum(unique_x[i] == x)
+
+    var_s = (n * (n - 1) * (2 * n + 5) + np.sum(tp * (tp - 1) * (2 * tp + 5))) / 18
+
+    if s > 0:
+        z = (s - 1) / np.sqrt(var_s)
+    elif s == 0:
+        z = 0
+    elif s < 0:
+        z = (s + 1) / np.sqrt(var_s)
+
+    # p値を計算
+    p = 2 * (1 - norm.cdf(abs(z)))  # two tail test
+    h = abs(z) > norm.ppf(1 - alpha / 2)
+
+   
+    if (z < 0) and h:
+        print('Decreasing trend')
+    elif (z > 0) and h:
+        print('Increasing trend')
+    else:
+        print('No trend')
+
+    return z, p
+
+# スクリプトが存在するディレクトリを取得
+script_directory = os.path.dirname(os.path.abspath(__file__))
+# Excelファイルからデータを読み込む
+file_path = "C:/Users/bb40120052/Desktop/プログラミング/Python/.vscode/.practice/pastCODE/yellow.sand_xlsx.xlsx"
+#"c:\\Codes\\Python\\.venv\\yellowsand.allyear.xlsx"
+df = pd.read_excel(file_path)
+
+# 西暦列と黄砂観測日数列のデータを取得
+year_column = '西暦'  # 西暦列の列名または列番号
+observed_days_column = '黄砂観測日数'  # 黄砂観測日数列の列名または列番号
+
+# Mann-Kendall検定を実行
+z, p = Mann_Kendall(df[observed_days_column].values)
+
+# 結果を表示
+print(f'Mann-Kendall Test Statistic: {z}')
+print(f'P-value: {p}')
+
