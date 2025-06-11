@@ -1,3 +1,4 @@
+#ひまわり標準データを一括ダウンロード
 from ftplib import FTP
 import os
 
