@@ -1,83 +1,88 @@
-#フォルダ内のMSMファイルをすべて読み込んで、任意の地点のデータを抽出し、出力ファイルに書き出す。
+#フォルダ内のMSMファイルをすべて読み込んで、任意の地点のデータを抽出し、出力ファイルに書き出す。修正版。
 import netCDF4 as nc
 import numpy as np
 import os
 from datetime import datetime, timedelta
 
 # 入力フォルダと出力フォルダ
-input_folder = "E:/Master/MSM(rawdata)/2024"
-output_folder = "E:/Master/MSM/2024"
+input_folder = "D:/Master/MSM(rawdata)/2024"
+output_folder = "D:/Master/MSM(Himawari)/2024"
 
 # 出力フォルダが存在しない場合は作成
 os.makedirs(output_folder, exist_ok=True)
 
-# 緯度・経度のターゲット値(アメダス)
-target_lat, target_lon = 32.442, 130.157
+# ターゲット緯度・経度(ひまわり抽出点)
+target_lat, target_lon = 32.75, 130.30
 
-# 入力フォルダ内の全NetCDFファイルを取得
+# NetCDFファイル一覧
 nc_files = sorted([f for f in os.listdir(input_folder) if f.endswith(".nc")])
 
-# 各ファイルに対して処理を実行
+# 各ファイル処理
 for nc_file in nc_files:
-    input_file = os.path.join(input_folder, nc_file)
-    output_file = os.path.join(output_folder, f"{os.path.splitext(nc_file)[0]}data.txt")
+    input_path = os.path.join(input_folder, nc_file)
+    output_path = os.path.join(output_folder, f"{os.path.splitext(nc_file)[0]}data.txt")
 
-    with nc.Dataset(input_file, 'r') as ds:
-        # 緯度・経度のデータを取得
-        latitudes = ds.variables['lat'][:]
-        longitudes = ds.variables['lon'][:]
+    with nc.Dataset(input_path, 'r') as ds:
+        lats = ds.variables['lat'][:]
+        lons = ds.variables['lon'][:]
+        lat_idx = np.abs(lats - target_lat).argmin()
+        lon_idx = np.abs(lons - target_lon).argmin()
 
-        # 最も近い緯度・経度のインデックスを取得
-        lat_index = np.abs(latitudes - target_lat).argmin()
-        lon_index = np.abs(longitudes - target_lon).argmin()
-
-        # 取得する変数リスト
-        variables_to_extract = [
-            'psea', 'sp', 'u', 'v', 'temp', 'rh', 
+        variables = [
+            'psea', 'sp', 'u', 'v', 'temp', 'rh',
             'r1h', 'ncld_upper', 'ncld_mid', 'ncld_low', 'ncld', 'dswrf'
         ]
 
-        # 時間情報を取得
-        time_values = ds.variables['time'][:]
-        time_units = ds.variables['time'].units  # "hours since YYYY-MM-DD HH:MM:SS+00:00"
+        time_var = ds.variables['time']
+        times = time_var[:]
+        time_units = time_var.units  # 例: "hours since 2022-01-01 00:00:00+00:00"
+        time_str = time_units.split("since")[-1].strip().split("+")[0]
+        base_time = datetime.strptime(time_str.strip(), "%Y-%m-%d %H:%M:%S")
 
-        # 時刻の基準（NetCDFのtime変数の基準時刻を取得）
-        base_time_str = time_units.split("since")[-1].strip()
-        base_datetime = datetime.strptime(base_time_str, "%Y-%m-%d %H:%M:%S%z")
+        # スケーリング関数（floatにキャスト）
+        def apply_scale(var, val):
+            scale = getattr(var, "scale_factor", 1.0)
+            offset = getattr(var, "add_offset", 0.0)
+            return float(val) * scale + offset
 
-        # スケール係数とオフセットの適用関数
-        def apply_scale_offset(var, values):
-            scale_factor = getattr(var, 'scale_factor', 1.0)
-            add_offset = getattr(var, 'add_offset', 0.0)
-            return values * scale_factor + add_offset
-
-        # 欠損値をチェックする関数
-        def check_missing_value(var, value):
-            fill_value = getattr(var, '_FillValue', None)
-            missing_value = getattr(var, 'missing_value', None)
-            if np.ma.is_masked(value) or value in [fill_value, missing_value]:
-                return "N/A"
-            return str(value)
+        # 欠損値チェック
+        def is_missing(var, val):
+            fill = getattr(var, "_FillValue", None)
+            miss = getattr(var, "missing_value", None)
+            if np.ma.is_masked(val) or val in [fill, miss] or np.isnan(val):
+                return True
+            return False
 
         # 出力ファイルにデータを書き込む
-        with open(output_file, 'w') as f:
-            # 各時間ステップごとにデータを取得（ヘッダーなし）
-            for t_idx, time_val in enumerate(time_values):
-                # 時間を HHMM 形式の整数に変換
-                current_time = base_datetime + timedelta(hours=float(time_val))
-                hhmm = current_time.strftime("%H%M")  # "HHMM" 形式
+        with open(output_path, 'w') as f:
+            # 実際の抽出座標を出力（確認用）
+            actual_lat = lats[lat_idx]
+            actual_lon = lons[lon_idx]
+            f.write(f"# Extracted point: lat={actual_lat:.3f}, lon={actual_lon:.3f}\n")
+            f.write("# Time psea sp u v temp rh r1h ncld_upper ncld_mid ncld_low ncld dswrf\n")
 
-                data_line = [hhmm]  # HHMM形式の時間情報
+            for t_idx, time_val in enumerate(times):
+                current_time = base_time + timedelta(hours=float(time_val))
+                hhmm = current_time.strftime("%H%M")
 
-                for var_name in variables_to_extract:
+                data_line = [hhmm]
+
+                
+                for var_name in variables:
                     var_data = ds.variables[var_name]
-                    raw_value = var_data[t_idx, lat_index, lon_index]  # 時間・位置でデータ取得
-                    scaled_value = apply_scale_offset(var_data, raw_value)  # スケール適用
-                    data_line.append(check_missing_value(var_data, scaled_value))  # 欠損値チェック
-
-                # 出力ファイルにデータを書き込む
+                    raw_value = var_data[t_idx, lat_idx, lon_idx]
+                    
+                    if np.ma.is_masked(raw_value):
+                        data_line.append("N/A")
+                    else:
+                        scaled_value = float(raw_value)
+                        if is_missing(var_data, scaled_value):
+                            data_line.append("N/A")
+                        else:
+                            data_line.append(f"{scaled_value:.3f}")
+                    
                 f.write(" ".join(data_line) + "\n")
 
-    print(f"Processed {nc_file} -> {output_file}")
+    print(f"Processed {nc_file} -> {output_path}")
 
 print("All NetCDF files processed successfully.")
