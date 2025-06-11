@@ -1,0 +1,60 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+import glob
+
+# MSMデータのフォルダパス
+msm_folder = r"D:/Master/MSM/2023"
+
+# MSMの列名
+msm_columns = [
+    "hour", "psea", "sp", "u", "v", "temp", "rh",
+    "r1h", "ncld_upper", "ncld_mid", "ncld_low", "ncld", "dswrf"
+]
+
+# MSMファイルの一覧（昇順）
+msm_files = sorted(glob.glob(os.path.join(msm_folder, "????data.txt")))
+
+# 全データをためるリスト
+all_data = []
+
+for msm_path in msm_files:
+    filename = os.path.basename(msm_path)
+    day_str = filename[:4]  # 例："0401"
+    full_day = f"2022{day_str}"  # 例："20220401"
+
+    # MSMファイル読み込み
+    df = pd.read_csv(
+    msm_path,
+    delim_whitespace=True,
+    names=msm_columns,
+    comment='#',
+    skiprows=2  # ヘッダー行2行をスキップ
+)
+
+
+    # hour列ゼロパディング & Timestamp生成
+    df["hour"] = df["hour"].astype(str).str.zfill(4)
+    df["Timestamp"] = pd.to_datetime(full_day + df["hour"], format="%Y%m%d%H%M")
+
+    # temp はもともとケルビンなので変換不要
+    all_data.append(df[["Timestamp", "temp"]])
+
+    print(f"[読み込み] {filename}：{len(df)} 件")
+
+# 結合・プロット
+if not all_data:
+    print("⚠️ 有効なデータが読み込まれませんでした。")
+else:
+    combined_df = pd.concat(all_data).sort_values("Timestamp").reset_index(drop=True)
+
+    # グラフ描画
+    plt.figure(figsize=(12, 6))
+    plt.plot(combined_df["Timestamp"], combined_df["temp"], color='blue', linewidth=1)
+
+    plt.title("Time Series of MSM Temperature (Kelvin)")
+    plt.xlabel("Timestamp")
+    plt.ylabel("Temperature (K)")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
