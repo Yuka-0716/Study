@@ -1,0 +1,53 @@
+#2地点のCPSデータを加重平均することで、格子点上の推定データを生成。
+
+import pandas as pd
+import numpy as np
+
+# ファイルパス
+cloud_file = "D:/Master/rawdata/all_data.txt"
+nakayama_file = "D:/Master/Nakayamalab/merge_MyokenandNita.txt"
+output_file = "D:/Master/Nakayamalab/finaldata/finaldata_all.txt"
+
+# === cloud_file 読み込みと整形（CLTH: m → km） ===
+cloud_df = pd.read_csv(
+    cloud_file,
+    delim_whitespace=True,
+    header=None,
+    names=["Date", "Time", "CLER_23", "CLTT", "CLTH", "CLOT", "CTYPE", "QA"],
+    na_values="N/A"
+)
+cloud_df = cloud_df.dropna(subset=["Time"])
+cloud_df["Hour"] = cloud_df["Time"].apply(lambda x: int(float(x)))
+cloud_df["Year"] = cloud_df["Date"].astype(str).str[:4].astype(int)
+cloud_df["Month"] = cloud_df["Date"].astype(str).str[4:6].astype(int)
+cloud_df["Day"] = cloud_df["Date"].astype(str).str[6:8].astype(int)
+cloud_df["CLTH"] = cloud_df["CLTH"] * 1e-3  # m → km
+cloud_df = cloud_df[["Year", "Month", "Day", "Hour", "CLTH"]]
+
+# === finaldata 読み込みと整形（r: μm → km）===
+rows = []
+with open(nakayama_file, 'r') as f:
+    for line in f:
+        parts = line.strip().split()
+        if len(parts) == 5:
+            year = int(parts[0])
+            month = int(parts[1][:2])
+            day = int(parts[1][2:])
+            hour = int(str(parts[2]).zfill(4)) // 100
+            nd = float(parts[3])              # Nd: 個/cm³（そのまま）
+            r = float(parts[4])        # 
+            rows.append([year, month, day, hour, nd, r])
+
+final_df = pd.DataFrame(rows, columns=["Year", "Month", "Day", "Hour", "Nd", "r"])
+
+# === マージと product 計算（すべて km 単位）===
+merged_df = pd.merge(final_df, cloud_df, on=["Year", "Month", "Day", "Hour"], how="inner")
+merged_df["product"] = merged_df["Nd"] * np.pi * (merged_df["r"] ** 2 / 5) * merged_df["CLTH"]
+
+# === MMDDとHHMMをゼロ埋め ===
+merged_df["MMDD"] = merged_df["Month"].astype(str).str.zfill(2) + merged_df["Day"].astype(str).str.zfill(2)
+merged_df["HHMM"] = merged_df["Hour"].astype(int).astype(str).str.zfill(2) + "00"
+
+# === 最終出力列選択と保存 ===
+output_cols = ["Year", "MMDD", "HHMM", "Nd", "r", "product"]
+merged_df[output_cols].to_csv(output_file, sep=" ", index=False, header=False)
