@@ -1,0 +1,88 @@
+#ひまわりとCPSの有効粒子半径・雲光学的厚さの比較(散布図)
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import linregress
+
+# === ファイルパス ===
+cloud_file = "D:/Master/rawdata/all_data.txt"
+nakayama_file = "D:/Master/Nakayamalab/finaldata/finaldata_all.txt"
+
+# === cloud_file 読み込みと整形 ===
+cloud_df = pd.read_csv(
+    cloud_file,
+    delim_whitespace=True,
+    header=None,
+    names=["Date", "Time", "CLER_23", "CLTT", "CLTH", "CLOT", "CTYPE", "QA"],
+    na_values="N/A"
+)
+
+cloud_df = cloud_df.dropna(subset=["Time"])
+cloud_df["Hour"] = cloud_df["Time"].apply(lambda x: int(float(x)))  # 時刻（整数時）
+cloud_df["Year"] = cloud_df["Date"].astype(str).str[:4].astype(int)
+cloud_df["Month"] = cloud_df["Date"].astype(str).str[4:6].astype(int)
+cloud_df["Day"] = cloud_df["Date"].astype(str).str[6:8].astype(int)
+cloud_df = cloud_df[["Year", "Month", "Day", "Hour", "CLER_23", "CLOT"]]
+
+# === finaldata 読み込みと整形（Hourの上2桁を抽出） ===
+rows = []
+with open(nakayama_file, 'r') as f:
+    for line in f:
+        parts = line.strip().split()
+        if len(parts) == 6:
+            year = int(parts[0])
+            month = int(parts[1][:2])
+            day = int(parts[1][2:])
+            hour_str = str(parts[2]).zfill(4)
+            hour = int(hour_str[:4])  # 上2桁（時）だけ使う
+            nd = float(parts[3])
+            efr = float(parts[4])
+            cot = float(parts[5])
+            rows.append([year, month, day, hour, nd, efr, cot])
+
+nakayama_df = pd.DataFrame(rows, columns=["Year", "Month", "Day", "Hour", "Nd", "efr", "COT"])
+
+# === マージと欠損除去 ===
+merged = pd.merge(cloud_df, nakayama_df, on=["Year", "Month", "Day", "Hour"], how="inner")
+merged = merged.dropna(subset=["CLER_23", "CLOT", "efr", "COT"])
+
+# === 散布図関数 ===
+def plot_scatter(x, y, xlabel, ylabel, title):
+    x = pd.to_numeric(x, errors='coerce')
+    y = pd.to_numeric(y, errors='coerce')
+    #mask = (x != 0) & (y != 0) & (~x.isna()) & (~y.isna()) & np.isfinite(x) & np.isfinite(y)
+    mask = (x != 0) & (y != 0) & (~x.isna()) & (~y.isna()) & np.isfinite(x) & np.isfinite(y) & (x.between(0, 60)) & (y.between(0, 60))
+    x = x[mask]
+    y = y[mask]
+    total_points = len(x)
+    print(f"\n[{title}]")
+
+    if total_points > 1 and x.nunique() > 1:
+        slope, intercept, r_value, _, _ = linregress(x, y)
+        mae = np.mean(x - y)
+        line_x = np.linspace(min(x), max(x), 100)
+        reg_line = slope * line_x + intercept
+
+        plt.figure(figsize=(7, 7))
+        plt.scatter(x, y, alpha=0.6, s=10, c='black', label="Data")
+        plt.plot(line_x, line_x, color='blue', linestyle='--', label="1:1 Line")
+        plt.plot(line_x, reg_line, 'r-', label=f"y = {slope:.2f}x + {intercept:.2f}")
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.title(f"{title}\nN = {total_points}, R = {r_value:.2f}, Slope = {slope:.2f}, MAE = {mae:.2f}")
+        plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
+
+        print(f"  有効プロット数: {total_points}")
+        print(f"  相関係数 R     : {r_value:.4f}")
+        print(f"  回帰直線の傾き: {slope:.4f}")
+        print(f"  平均誤差 (MAE): {mae:.4f}")
+    else:
+        print("  有効なプロットが不足しているため、回帰・評価はスキップされました。")
+
+# === 散布図の出力 ===
+plot_scatter(merged["CLER_23"], merged["efr"], "CLER_23", "efr", "CLER_23 vs efr")
+plot_scatter(merged["CLOT"], merged["COT"], "CLOT", "COT", "CLOT vs COT")
