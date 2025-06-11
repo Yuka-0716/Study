@@ -1,0 +1,62 @@
+import netCDF4 as nc
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ファイルパスリスト
+file_paths = [
+    "D:\\Master\\202203\\01\\00\\NC_H08_20220301_0040_L2CLP010_FLDK.02401_02401.nc",
+    "D:\\Master\\202203\\01\\00\\NC_H08_20220301_0050_L2CLP010_FLDK.02401_02401.nc",
+    "D:\\Master\\202203\\01\\00\\NC_H08_20220301_0000_L2CLP010_FLDK.02401_02401.nc",
+    "D:\\Master\\202203\\01\\00\\NC_H08_20220301_0010_L2CLP010_FLDK.02401_02401.nc",
+    "D:\\Master\\202203\\01\\00\\NC_H08_20220301_0020_L2CLP010_FLDK.02401_02401.nc",
+    "D:\\Master\\202203\\01\\00\\NC_H08_20220301_0030_L2CLP010_FLDK.02401_02401.nc"
+]
+
+# 時間情報（10分刻み）
+time_labels = ["00:40", "00:50", "00:00", "00:10", "00:20", "00:30"]
+
+# 観測点（緯度経度）
+latitude_target = 32.75
+longitude_target = 130.30
+
+# 変数リスト
+variables_to_plot = ['Hour', 'CLOT', 'CLTT', 'CLTH', 'CLER_23', 'CLTYPE', 'QA']
+
+# 結果を格納する辞書
+time_series_data = {var: [] for var in variables_to_plot}
+
+# データの読み込みと抽出
+for file_path in file_paths:
+    with nc.Dataset(file_path, 'r') as dataset:
+        latitudes = dataset.variables['latitude'][:]
+        longitudes = dataset.variables['longitude'][:]
+        
+        # 指定の緯度経度に最も近いインデックスを取得
+        lat_idx = np.abs(latitudes - latitude_target).argmin()
+        lon_idx = np.abs(longitudes - longitude_target).argmin()
+        
+        # 各変数の値を取得
+        for var_name in variables_to_plot:
+            var_data = dataset.variables[var_name]
+            value = var_data[lat_idx, lon_idx]
+            
+            # スケールファクターとオフセットを適用
+            scale_factor = getattr(var_data, 'scale_factor', 1.0)
+            add_offset = getattr(var_data, 'add_offset', 0.0)
+            missing_value = getattr(var_data, 'missing_value', None)
+
+            if missing_value is not None and value == missing_value:
+                time_series_data[var_name].append(None)  # 欠損値はNoneを追加
+            else:
+                time_series_data[var_name].append(value * scale_factor + add_offset)
+
+# 時系列プロット
+for var_name in variables_to_plot:
+    plt.figure(figsize=(8, 6))
+    plt.plot(time_labels, time_series_data[var_name], marker='o')
+    plt.title(f"Time Series of {var_name}", fontsize=14)
+    plt.xlabel("Time (UTC)", fontsize=12)
+    plt.ylabel(var_name, fontsize=12)
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
