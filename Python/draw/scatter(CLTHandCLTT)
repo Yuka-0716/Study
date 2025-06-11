@@ -1,0 +1,60 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# テキストデータを読み込む関数
+def load_data(file_path):
+    # テキストファイルの読み込み (区切り文字やデータ形式を適宜調整)
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    # データを解析用に変換
+    data = []
+    for line in lines:
+        # スペース区切りで分割し、数値部分を抽出
+        values = line.strip().split()
+        try:
+            # 数値に変換できる部分を抽出
+            data.append([float(v) for v in values])
+        except ValueError:
+            continue  # 数値に変換できない行をスキップ
+
+    return np.array(data)
+
+# 散布図を描画し、データ数と相関係数を計算する関数
+def plot_scatter_and_calculate(data):
+    # 5列目（CLTH）を横軸、6列目（CLTT）を縦軸として抽出
+    clth = data[:, 3]  # 4列目（0インデックス）
+    cltt = data[:, 4]  # 5列目（0インデックス）
+
+    # データ数を計算
+    num_data = len(clth)
+
+    # 相関係数を計算
+    correlation = np.corrcoef(clth, cltt)[0, 1]
+
+    # 散布図を描画
+    plt.figure(figsize=(8, 6))
+    plt.scatter(clth, cltt, s=10, color='black', alpha=0.7, edgecolors='none')
+    plt.title('Scatter Plot of CLTH vs. CLTT')
+    plt.xlabel('CLTH (5th Column)')
+    plt.ylabel('CLTT (6th Column)')
+    plt.grid(True)
+    plt.show()
+
+    # 結果を出力
+    print(f"Data Count: {num_data}")
+    print(f"Correlation Coefficient: {correlation:.4f}")
+
+# メイン処理
+def main():
+    # データファイルのパス
+    file_path = 'E:/Master/rawdata/202303_data.txt'
+
+    # データを読み込む
+    data = load_data(file_path)
+
+    # 散布図を描画し、データ数と相関係数を出力
+    plot_scatter_and_calculate(data)
+
+if __name__ == "__main__":
+    main()
